@@ -126,12 +126,18 @@ class HomePage extends StatelessWidget {
   Widget getRandomItem() {
     DatabaseReference ref = FirebaseDatabase.instance.ref();
     return FutureBuilder(
-        future: ref.get(),
+        future: getAllData(ref),
         builder: (context, snapshot) {
           if (snapshot.data == null) return const Text('Loading items...');
           var allItems = snapshot.data!.value as Map<String, dynamic>;
+          allItems.removeWhere((key, value) => value['isTaken'] != null);
           return RandomWidget(allItems: allItems);
         });
+  }
+
+  Future<DataSnapshot> getAllData(DatabaseReference ref) {
+    print('Getting all data');
+    return ref.get();
   }
 }
 

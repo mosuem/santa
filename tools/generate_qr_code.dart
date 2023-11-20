@@ -5,11 +5,21 @@ Future<void> main(List<String> args) async {
   var contents = File('data/total_hashed.json').readAsStringSync();
   var map = jsonDecode(contents) as Map<String, dynamic>;
   for (var element in map.entries) {
-    await runQrCode(element.key, element.value['url']);
+    await runQrCode(
+      element.key,
+      element.value['url'],
+      element.value['brand'],
+      '${element.value['price']} €',
+    );
   }
 }
 
-Future<void> runQrCode(String name, String content) async {
+Future<void> runQrCode(
+  String name,
+  String content,
+  String title,
+  String price,
+) async {
   var output = '$name.png';
   Directory('codes').createSync();
   var tempDir = Directory('codes_temp');
@@ -23,6 +33,28 @@ Future<void> runQrCode(String name, String content) async {
   await Process.run('convert', [
     tmpFile,
     ...['-resize', '200x200'],
+    tmpFile,
+  ]);
+  await Process.run('convert', [
+    tmpFile,
+    ...['-gravity', 'north'],
+    ...['-extent', '200x300'],
+    tmpFile,
+  ]);
+  await Process.run('convert', [
+    tmpFile,
+    ...['-gravity', 'South'],
+    ...['-pointsize', '18'],
+    ...['-font', 'Roboto'],
+    ...['-annotate', '+0+80', title],
+    tmpFile,
+  ]);
+  await Process.run('convert', [
+    tmpFile,
+    ...['-gravity', 'South'],
+    ...['-pointsize', '18'],
+    ...['-font', 'Roboto-Bold'],
+    ...['-annotate', '+0+30', price],
     'codes/$output',
   ]);
   tempDir.deleteSync(recursive: true);
