@@ -136,6 +136,38 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  grizzly_io:
+    dependency: "direct dev"
+    description:
+      name: grizzly_io
+      sha256: "3c343af587297e99145cc526e488ac232945da2d9943ab0809518210f2612a28"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.1"
+  http:
+    dependency: transitive
+    description:
+      name: http
+      sha256: "5895291c13fa8a3bd82e76d5627f69e0d85ca6a30dcac95c4ea19a5d555879c2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.13.6"
+  http_parser:
+    dependency: transitive
+    description:
+      name: http_parser
+      sha256: "2aa08ce0341cc9b354a498388e30986515406668dbcc4f7c950c3e715496693b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.2"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: "910f85bce16fb5c6f614e117efa303e85a1731bb0081edf3604a2ae6e9a3cc91"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.17.0"
   js:
     dependency: transitive
     description:

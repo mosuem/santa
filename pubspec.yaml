@@ -36,6 +36,7 @@ dependencies:
   url_launcher: ^6.1.14
 
 dev_dependencies:
+  grizzly_io: ^3.0.1
   flutter_test:
     sdk: flutter
 

@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +44,7 @@ class HomePage extends StatelessWidget {
       body: Center(
         child: switch (id) {
           var s? => getItem(s),
-          null => getRandomItem(),
+          null => showAllItems(),
         },
       ),
     );
@@ -75,8 +73,14 @@ class HomePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                    'You can gift ${item.company} from ${item.brand}, which costs about ${(item.price / 10).round() * 10} EUR (excluding delivery)'),
+                    'You can gift "${item.name}" from ${item.brand}, which costs ${item.price} € (excluding delivery)'),
                 const SizedBox(height: 10),
+                TextButton(
+                  onPressed: () => launchUrl(Uri.parse(item.url)),
+                  child: const Text(
+                      'Preview the item. Do not buy using this link!'),
+                ),
+                const SizedBox(height: 100),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -93,7 +97,8 @@ class HomePage extends StatelessWidget {
                           ),
                         );
                       },
-                      child: const Text('Yes'),
+                      child:
+                          const Text('I confirm that I want to buy this item.'),
                     ),
                   ],
                 )
@@ -104,7 +109,7 @@ class HomePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                    'The item ${item.company} from ${item.brand} is already taken!'),
+                    'The item ${item.name} from ${item.brand} is already taken!'),
                 const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () {
@@ -123,15 +128,21 @@ class HomePage extends StatelessWidget {
         });
   }
 
-  Widget getRandomItem() {
+  Widget showAllItems() {
     DatabaseReference ref = FirebaseDatabase.instance.ref();
     return FutureBuilder(
         future: getAllData(ref),
         builder: (context, snapshot) {
           if (snapshot.data == null) return const Text('Loading items...');
           var allItems = snapshot.data!.value as Map<String, dynamic>;
-          allItems.removeWhere((key, value) => value['isTaken'] != null);
-          return RandomWidget(allItems: allItems);
+          return ListAllItems(
+              allItems: allItems.entries.map((e) {
+            var itemMap = e.value as Map<String, dynamic>;
+            itemMap['id'] = e.key;
+            var item = Item.fromMap(itemMap);
+            return item;
+          }).toList()
+                ..sort((a, b) => a.name.compareTo(b.name)));
         });
   }
 
@@ -141,58 +152,58 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class RandomWidget extends StatefulWidget {
-  const RandomWidget({
+class ListAllItems extends StatelessWidget {
+  const ListAllItems({
     super.key,
     required this.allItems,
   });
 
-  final Map<String, dynamic> allItems;
-
-  @override
-  State<RandomWidget> createState() => _RandomWidgetState();
-}
-
-class _RandomWidgetState extends State<RandomWidget> {
-  int randomIndex = 0;
+  final List<Item> allItems;
 
   @override
   Widget build(BuildContext context) {
-    randomIndex = Random().nextInt(widget.allItems.length);
-    var selectedItemEntry = widget.allItems.entries.toList()[randomIndex];
-    var itemMap = selectedItemEntry.value as Map<String, dynamic>;
-    itemMap['id'] = selectedItemEntry.key;
-    var item = Item.fromMap(itemMap);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text('How about this item: ${item.company} from ${item.brand}'),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (BuildContext context) => HomePage(argId: item.id),
-                  ),
-                );
+    return ListView.builder(
+      itemCount: allItems.length,
+      itemBuilder: (context, index) {
+        var item = allItems[index];
+        return ListTile(
+          title: Row(
+            children: [
+              Text(
+                item.name,
+                style: item.isTaken != null
+                    ? const TextStyle(color: Colors.grey)
+                    : null,
+              ),
+              const Spacer(),
+              Text(
+                '~${5 * (item.price / 5).round()} €',
+                style: item.isTaken != null
+                    ? const TextStyle(color: Colors.grey)
+                    : null,
+              ),
+            ],
+          ),
+          subtitle: Text(
+            item.brand,
+            style: item.isTaken != null
+                ? const TextStyle(color: Colors.grey)
+                : null,
+          ),
+          leading: Icon(
+            Icons.redeem,
+            color: item.isTaken != null ? Colors.grey : null,
+          ),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return HomePage(argId: item.id);
               },
-              child: const Text('Yes!'),
             ),
-            const SizedBox(width: 10),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  randomIndex = Random().nextInt(widget.allItems.length);
-                });
-              },
-              child: const Text('No, show me a different one'),
-            ),
-          ],
-        )
-      ],
+          ),
+        );
+      },
     );
   }
 }
@@ -210,18 +221,36 @@ class MyPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Die Arche München Toy Appeal'),
-        automaticallyImplyLeading: false,
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TextButton(
-              onPressed: () => launchUrl(Uri.parse(item.url)),
-              child: Text(
-                  'Order the product from ${item.url} and send it to the following address: @henkel'),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              const Text('Thanks for participating! Now follow these steps:'),
+              const SizedBox(height: 10),
+              const Text('1. Order the product:'),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextButton(
+                  onPressed: () => launchUrl(Uri.parse(item.url)),
+                  child: Text(item.url),
+                ),
+              ),
+              const Text(
+                  '2. Send it to this address. Remember to include the name for tracking purposes. Alternatively, bring it to desk 5Z1C6A in MUC-ARP.'),
+              const Padding(
+                padding: EdgeInsets.all(20.0),
+                child: SelectableText(
+                    "Google Germany GmbH\nNina Henkel\nErika-Mann-Str. 33\n80636 München"),
+              ),
+              const SizedBox(height: 10),
+              const SelectableText(
+                  'For any questions, consult the FAQs at go/arche-toys, or contact @henkel or @mosum.'),
+            ],
+          ),
         ),
       ),
     );
