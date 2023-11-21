@@ -13,6 +13,7 @@ Future<void> main(List<String> args) async {
   for (int i = 0; i < decoded.length; i++) {
     var item = decoded[i];
     var bytes = utf8.encode(item['url'] + i.toString());
+    item.remove('description');
     var digest = sha1.convert(bytes).toString();
     total[digest] = item;
   }

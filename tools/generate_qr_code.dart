@@ -5,11 +5,13 @@ Future<void> main(List<String> args) async {
   var contents = File('data/total_hashed.json').readAsStringSync();
   var map = jsonDecode(contents) as Map<String, dynamic>;
   for (var element in map.entries) {
+    var id = element.key;
+    print('At $id');
     await runQrCode(
-      element.key,
-      element.value['url'],
-      element.value['brand'],
-      '${element.value['price']} €',
+      id,
+      'https://santa-database.web.app/?id=$id',
+      element.value['name'],
+      '${(double.parse(element.value['price'])).toStringAsFixed(2)} €',
     );
   }
 }

@@ -7,9 +7,7 @@ import 'firebase_options.dart';
 import 'item.dart';
 
 Future<void> main() async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -43,27 +41,31 @@ class HomePage extends StatelessWidget {
       ),
       body: Center(
         child: switch (id) {
-          var s? => getItem(s),
-          null => showAllItems(),
+          var s? => ShowSingleItem(id: s),
+          null => const ShowAllItems(),
         },
       ),
     );
   }
+}
 
-  FutureBuilder<Item> getItem(String id) {
-    DatabaseReference ref = FirebaseDatabase.instance.ref(id);
-    return FutureBuilder<Item>(
-        future: ref.get().then((value) {
-          if (!value.exists) {
-            return Item.fromMap({});
-          }
-          var map = value.value as Map<String, dynamic>;
+class ShowSingleItem extends StatelessWidget {
+  const ShowSingleItem({super.key, required this.id});
+
+  final String id;
+
+  @override
+  Widget build(BuildContext context) {
+    final ref = FirebaseDatabase.instance.ref(id);
+    return StreamBuilder(
+        stream: ref.onValue,
+        builder: (context, event) {
+          if (!event.hasData) return const CircularProgressIndicator();
+          final itemMap = event.data!;
+          var map = itemMap.snapshot.value as Map<String, dynamic>;
           map['id'] = id;
-          return Item.fromMap(map);
-        }),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return const CircularProgressIndicator();
-          final item = snapshot.data!;
+          final item = Item.fromMap(map);
+
           if (item.id.isEmpty) {
             throw ArgumentError('No item with the id $id exists.');
           }
@@ -73,12 +75,11 @@ class HomePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                    'You can gift "${item.name}" from ${item.brand}, which costs ${item.price} € (excluding delivery)'),
+                    'You can fulfill a wish for ${item.number > 1 ? '${item.number} times' : ''} "${item.name}" from ${item.brand}, which costs ${item.price.toStringAsFixed(2)} € ${item.number > 1 ? 'total' : ''}(excluding delivery)'),
                 const SizedBox(height: 10),
                 TextButton(
                   onPressed: () => launchUrl(Uri.parse(item.url)),
-                  child: const Text(
-                      'Preview the item. Do not buy using this link!'),
+                  child: const Text('Preview the wish'),
                 ),
                 const SizedBox(height: 100),
                 Row(
@@ -86,19 +87,18 @@ class HomePage extends StatelessWidget {
                   children: [
                     ElevatedButton(
                       onPressed: () async {
-                        await ref.update(
-                            {'isTaken': DateTime.now().toIso8601String()});
                         // ignore: use_build_context_synchronously
                         Navigator.push<void>(
                           context,
                           MaterialPageRoute<void>(
-                            builder: (BuildContext context) =>
-                                MyPage(item: item),
+                            builder: (BuildContext context) => MyPage(
+                              item: item,
+                              ref: ref,
+                            ),
                           ),
                         );
                       },
-                      child:
-                          const Text('I confirm that I want to buy this item.'),
+                      child: const Text('I would like to fulfill this wish!'),
                     ),
                   ],
                 )
@@ -109,32 +109,41 @@ class HomePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                    'The item ${item.name} from ${item.brand} is already taken!'),
+                    'The wish ${item.name} from ${item.brand} is already fulfilled by somebody!'),
                 const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push<void>(
                       context,
                       MaterialPageRoute<void>(
-                        builder: (BuildContext context) => MyPage(item: item),
+                        builder: (BuildContext context) => MyPage(
+                          item: item,
+                          ref: ref,
+                        ),
                       ),
                     );
                   },
-                  child: const Text('I took it, please show me the link again'),
+                  child: const Text('It was me, please show me the link again'),
                 )
               ],
             );
           }
         });
   }
+}
 
-  Widget showAllItems() {
-    DatabaseReference ref = FirebaseDatabase.instance.ref();
-    return FutureBuilder(
-        future: getAllData(ref),
-        builder: (context, snapshot) {
-          if (snapshot.data == null) return const Text('Loading items...');
-          var allItems = snapshot.data!.value as Map<String, dynamic>;
+class ShowAllItems extends StatelessWidget {
+  const ShowAllItems({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+        stream: FirebaseDatabase.instance.ref().onValue,
+        builder: (context, event) {
+          if (!event.hasData) return const Text('Loading items...');
+          var allItems = event.data!.snapshot.value as Map<String, dynamic>;
           return ListAllItems(
               allItems: allItems.entries.map((e) {
             var itemMap = e.value as Map<String, dynamic>;
@@ -142,15 +151,12 @@ class HomePage extends StatelessWidget {
             var item = Item.fromMap(itemMap);
             return item;
           }).toList()
-                ..sort((a, b) => a.name.compareTo(b.name)));
+                ..sort((a, b) => a.id.compareTo(b.id)));
         });
   }
-
-  Future<DataSnapshot> getAllData(DatabaseReference ref) {
-    print('Getting all data');
-    return ref.get();
-  }
 }
+
+final grey = Colors.grey.shade300;
 
 class ListAllItems extends StatelessWidget {
   const ListAllItems({
@@ -170,29 +176,24 @@ class ListAllItems extends StatelessWidget {
           title: Row(
             children: [
               Text(
-                item.name,
-                style: item.isTaken != null
-                    ? const TextStyle(color: Colors.grey)
-                    : null,
+                item.name +
+                    (item.isTaken != null ? ' (already fulfilled)' : ''),
+                style: item.isTaken != null ? TextStyle(color: grey) : null,
               ),
               const Spacer(),
               Text(
                 '~${5 * (item.price / 5).round()} €',
-                style: item.isTaken != null
-                    ? const TextStyle(color: Colors.grey)
-                    : null,
+                style: item.isTaken != null ? TextStyle(color: grey) : null,
               ),
             ],
           ),
           subtitle: Text(
             item.brand,
-            style: item.isTaken != null
-                ? const TextStyle(color: Colors.grey)
-                : null,
+            style: item.isTaken != null ? TextStyle(color: grey) : null,
           ),
           leading: Icon(
             Icons.redeem,
-            color: item.isTaken != null ? Colors.grey : null,
+            color: item.isTaken != null ? grey : null,
           ),
           onTap: () => Navigator.push(
             context,
@@ -210,9 +211,12 @@ class ListAllItems extends StatelessWidget {
 
 class MyPage extends StatelessWidget {
   final Item item;
+  final DatabaseReference ref;
+
   const MyPage({
     Key? key,
     required this.item,
+    required this.ref,
   }) : super(key: key);
 
   @override
@@ -231,24 +235,48 @@ class MyPage extends StatelessWidget {
             children: <Widget>[
               const Text('Thanks for participating! Now follow these steps:'),
               const SizedBox(height: 10),
-              const Text('1. Order the product:'),
+              item.number <= 1
+                  ? const Text('1. Order the product:')
+                  : Text(
+                      '1. Order exactly ${item.number} units of the product by following this link:'),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextButton(
-                  onPressed: () => launchUrl(Uri.parse(item.url)),
-                  child: Text(item.url),
+                  onPressed: () async {
+                    var snapshot = await ref.child('isTaken').get();
+                    if (snapshot.value == null) {
+                      await ref.update(
+                          {'isTaken': DateTime.now().toIso8601String()});
+                      await launchUrl(Uri.parse(item.url));
+                    } else {
+                      // ignore: use_build_context_synchronously
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: const Text(
+                      'ONLY click here if you will fulfill this wish. This will mark the wish as fulfilled for others.'),
                 ),
               ),
               const Text(
-                  '2. Send it to this address. Remember to include the name for tracking purposes. Alternatively, bring it to desk 5Z1C6A in MUC-ARP.'),
+                  '2. Send it to this address. Remember to include the name for tracking purposes. Alternatively, bring it to desk 5Z1C6A (@mosum) in MUC-ARP.'),
               const Padding(
                 padding: EdgeInsets.all(20.0),
                 child: SelectableText(
                     "Google Germany GmbH\nNina Henkel\nErika-Mann-Str. 33\n80636 München"),
               ),
               const SizedBox(height: 10),
-              const SelectableText(
-                  'For any questions, consult the FAQs at go/arche-toys, or contact @henkel or @mosum.'),
+              Row(
+                children: [
+                  const SelectableText(
+                      'For any questions, consult the FAQs at'),
+                  TextButton(
+                    onPressed: () => launchUrl(
+                        Uri.parse('http://go/toy-appeal-munich-2023')),
+                    child: const Text('go/toy-appeal-munich-2023'),
+                  ),
+                  const SelectableText(', or contact @henkel or @mosum.'),
+                ],
+              ),
             ],
           ),
         ),
