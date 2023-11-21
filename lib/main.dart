@@ -168,43 +168,46 @@ class ListAllItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: allItems.length,
-      itemBuilder: (context, index) {
-        var item = allItems[index];
-        return ListTile(
-          title: Row(
-            children: [
-              Text(
-                item.name +
-                    (item.isTaken != null ? ' (already fulfilled)' : ''),
-                style: item.isTaken != null ? TextStyle(color: grey) : null,
-              ),
-              const Spacer(),
-              Text(
-                '~${5 * (item.price / 5).round()} €',
-                style: item.isTaken != null ? TextStyle(color: grey) : null,
-              ),
-            ],
-          ),
-          subtitle: Text(
-            item.brand,
-            style: item.isTaken != null ? TextStyle(color: grey) : null,
-          ),
-          leading: Icon(
-            Icons.redeem,
-            color: item.isTaken != null ? grey : null,
-          ),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) {
-                return HomePage(argId: item.id);
-              },
+    return SizedBox(
+      width: 800,
+      child: ListView.builder(
+        itemCount: allItems.length,
+        itemBuilder: (context, index) {
+          var item = allItems[index];
+          return ListTile(
+            title: Row(
+              children: [
+                Text(
+                  item.name +
+                      (item.isTaken != null ? ' (already fulfilled)' : ''),
+                  style: item.isTaken != null ? TextStyle(color: grey) : null,
+                ),
+                const Spacer(),
+                Text(
+                  '~${5 * (item.price / 5).round()} €',
+                  style: item.isTaken != null ? TextStyle(color: grey) : null,
+                ),
+              ],
             ),
-          ),
-        );
-      },
+            subtitle: Text(
+              item.brand,
+              style: item.isTaken != null ? TextStyle(color: grey) : null,
+            ),
+            leading: Icon(
+              Icons.redeem,
+              color: item.isTaken != null ? grey : null,
+            ),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) {
+                  return HomePage(argId: item.id);
+                },
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
