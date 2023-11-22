@@ -78,7 +78,7 @@ class ShowSingleItem extends StatelessWidget {
                     'You can fulfill a wish for ${item.number > 1 ? '${item.number} times' : ''} "${item.name}" from ${item.brand}, which costs ${item.price.toStringAsFixed(2)} € ${item.number > 1 ? 'total' : ''}(excluding delivery)'),
                 const SizedBox(height: 10),
                 TextButton(
-                  onPressed: () => launchUrl(Uri.parse(item.url)),
+                  onPressed: () => launchUrl(Uri.parse(item.snipit)),
                   child: const Text('Preview the wish'),
                 ),
                 const SizedBox(height: 100),
@@ -273,9 +273,9 @@ class MyPage extends StatelessWidget {
                   const SelectableText(
                       'For any questions, consult the FAQs at'),
                   TextButton(
-                    onPressed: () => launchUrl(
-                        Uri.parse('http://go/toy-appeal-munich-2023')),
-                    child: const Text('go/toy-appeal-munich-2023'),
+                    onPressed: () =>
+                        launchUrl(Uri.parse('http://go/toy-appeal-muc-2023')),
+                    child: const Text('go/toy-appeal-muc-2023'),
                   ),
                   const SelectableText(', or contact @henkel or @mosum.'),
                 ],

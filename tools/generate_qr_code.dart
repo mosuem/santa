@@ -2,8 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 Future<void> main(List<String> args) async {
-  var contents = File('data/total_hashed.json').readAsStringSync();
+  var contents = File('data/physical_hashed.json').readAsStringSync();
   var map = jsonDecode(contents) as Map<String, dynamic>;
+  Directory('codes').deleteSync(recursive: true);
+  Directory('codes').createSync();
+  Directory('codes_temp').createSync();
   for (var element in map.entries) {
     var id = element.key;
     print('At $id');
@@ -14,6 +17,8 @@ Future<void> main(List<String> args) async {
       '${(double.parse(element.value['price'])).toStringAsFixed(2)} €',
     );
   }
+  Directory('codes_temp').deleteSync(recursive: true);
+  print('done');
 }
 
 Future<void> runQrCode(
@@ -23,9 +28,6 @@ Future<void> runQrCode(
   String price,
 ) async {
   var output = '$name.png';
-  Directory('codes').createSync();
-  var tempDir = Directory('codes_temp');
-  tempDir.createSync();
   var tmpFile = 'codes_temp/$output';
   await Process.run('qrencode', [
     ...['-o', tmpFile],
@@ -59,5 +61,4 @@ Future<void> runQrCode(
     ...['-annotate', '+0+30', price],
     'codes/$output',
   ]);
-  tempDir.deleteSync(recursive: true);
 }
