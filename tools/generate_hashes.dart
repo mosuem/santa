@@ -12,6 +12,7 @@ Future<void> main(List<String> args) async {
   decoded.sort((a, b) => a['url'].toString().compareTo(b['url'].toString()));
   for (int i = 0; i < decoded.length; i++) {
     var item = decoded[i];
+    item['physical'] = i < 30 ? 'true' : 'false';
     var bytes = utf8.encode(item['url'] + i.toString());
     item.remove('description');
     var digest = sha1.convert(bytes).toString();
@@ -25,4 +26,5 @@ Future<void> main(List<String> args) async {
   File('data/physical_hashed.json')
       .writeAsStringSync(encoder.convert(physical));
   File('data/virtual_hashed.json').writeAsStringSync(encoder.convert(virtual));
+  File('data/total_hashed.json').writeAsStringSync(encoder.convert(total));
 }

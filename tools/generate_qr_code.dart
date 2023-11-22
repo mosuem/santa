@@ -12,9 +12,9 @@ Future<void> main(List<String> args) async {
     print('At $id');
     await runQrCode(
       id,
-      'https://santa-database.web.app/?id=$id',
+      'https://toy-appeal-muc.web.app/?id=$id',
       element.value['name'],
-      '${(double.parse(element.value['price'])).toStringAsFixed(2)} €',
+      '${(double.parse(element.value['price']) * (int.tryParse(element.value['number']) ?? 1)).toStringAsFixed(2)} €',
     );
   }
   Directory('codes_temp').deleteSync(recursive: true);

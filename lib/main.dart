@@ -145,12 +145,15 @@ class ShowAllItems extends StatelessWidget {
           if (!event.hasData) return const Text('Loading items...');
           var allItems = event.data!.snapshot.value as Map<String, dynamic>;
           return ListAllItems(
-              allItems: allItems.entries.map((e) {
-            var itemMap = e.value as Map<String, dynamic>;
-            itemMap['id'] = e.key;
-            var item = Item.fromMap(itemMap);
-            return item;
-          }).toList()
+              allItems: allItems.entries
+                  .map((e) {
+                    var itemMap = e.value as Map<String, dynamic>;
+                    itemMap['id'] = e.key;
+                    var item = Item.fromMap(itemMap);
+                    return item;
+                  })
+                  .where((e) => !e.physical)
+                  .toList()
                 ..sort((a, b) => a.id.compareTo(b.id)));
         });
   }
@@ -168,6 +171,7 @@ class ListAllItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(allItems.length);
     return SizedBox(
       width: 800,
       child: ListView.builder(

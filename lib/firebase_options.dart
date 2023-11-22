@@ -53,12 +53,13 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAFTBC1uBUrWajAmMtWrpiSjoekjBjJltk',
-    appId: '1:812240024744:web:7a89b08074d41db2df7e9d',
-    messagingSenderId: '812240024744',
-    projectId: 'santa-database',
-    authDomain: 'santa-database.firebaseapp.com',
-    databaseURL: 'https://santa-database-default-rtdb.europe-west1.firebasedatabase.app',
-    storageBucket: 'santa-database.appspot.com',
+    apiKey: 'AIzaSyBTh-n5xBtzlvmWQeCvLtEaG3Nq2fS6xyU',
+    appId: '1:366356460610:web:6818430d777d52dff529db',
+    messagingSenderId: '366356460610',
+    projectId: 'toy-appeal-muc',
+    authDomain: 'toy-appeal-muc.firebaseapp.com',
+    databaseURL: 'https://toy-appeal-muc-default-rtdb.europe-west1.firebasedatabase.app',
+    storageBucket: 'toy-appeal-muc.appspot.com',
+    measurementId: 'G-0MC5EVE5JZ',
   );
 }

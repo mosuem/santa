@@ -9,6 +9,7 @@ class Item {
   final String brand;
   final String url;
   final String snipit;
+  final bool physical;
   final DateTime? isTaken;
 
   Item({
@@ -18,6 +19,7 @@ class Item {
     required this.name,
     required this.number,
     required this.brand,
+    required this.physical,
     required this.url,
     required this.snipit,
     this.isTaken,
@@ -33,6 +35,7 @@ class Item {
       'number': number.toString(),
       'price': _price.toString(),
       'brand': brand,
+      'physical': physical.toString(),
       'url': url,
       'snipit': snipit,
       'isTaken': isTaken?.toIso8601String(),
@@ -47,6 +50,7 @@ class Item {
       number: int.tryParse(map['number']) ?? 1,
       price: double.tryParse(map['price']) ?? 0,
       brand: map['brand'] ?? '',
+      physical: bool.tryParse(map['physical']) ?? false,
       url: map['url'] ?? '',
       snipit: map['snipit'] ?? '',
       isTaken:
@@ -57,11 +61,6 @@ class Item {
   String toJson() => json.encode(toMap());
 
   factory Item.fromJson(String source) => Item.fromMap(json.decode(source));
-
-  @override
-  String toString() {
-    return 'Item(id: $id, description: $description, name: $name, number: $number, _price: $_price, brand: $brand, url: $url, snipit: $snipit, isTaken: $isTaken)';
-  }
 
   @override
   bool operator ==(Object other) {
@@ -76,6 +75,7 @@ class Item {
         other.brand == brand &&
         other.url == url &&
         other.snipit == snipit &&
+        other.physical == physical &&
         other.isTaken == isTaken;
   }
 
@@ -89,6 +89,7 @@ class Item {
         brand.hashCode ^
         url.hashCode ^
         snipit.hashCode ^
+        physical.hashCode ^
         isTaken.hashCode;
   }
 }

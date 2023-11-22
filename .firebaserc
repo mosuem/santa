@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "santa-database"
-  }
+    "default": "toy-appeal-muc",
+    "release": "toy-appeal-muc"
+  },
+  "targets": {},
+  "etags": {}
 }
