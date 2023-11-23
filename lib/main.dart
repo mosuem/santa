@@ -119,6 +119,7 @@ class ShowSingleItem extends StatelessWidget {
                         builder: (BuildContext context) => MyPage(
                           item: item,
                           ref: ref,
+                          taken: true,
                         ),
                       ),
                     );
@@ -174,43 +175,62 @@ class ListAllItems extends StatelessWidget {
     print(allItems.length);
     return SizedBox(
       width: 800,
-      child: ListView.builder(
-        itemCount: allItems.length,
-        itemBuilder: (context, index) {
-          var item = allItems[index];
-          return ListTile(
-            title: Row(
-              children: [
-                Text(
-                  item.name +
-                      (item.isTaken != null ? ' (already fulfilled)' : ''),
-                  style: item.isTaken != null ? TextStyle(color: grey) : null,
-                ),
-                const Spacer(),
-                Text(
-                  '~${5 * (item.price / 5).round()} €',
-                  style: item.isTaken != null ? TextStyle(color: grey) : null,
-                ),
-              ],
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              '${allItems.where((item) => item.isTaken != null).length} out of the ${allItems.length} gifts are gone already - take part!',
+              style: const TextStyle(fontSize: 20),
             ),
-            subtitle: Text(
-              item.brand,
-              style: item.isTaken != null ? TextStyle(color: grey) : null,
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: allItems.length,
+              itemBuilder: (context, index) {
+                var item = allItems[index];
+                return ListTile(
+                  title: Row(
+                    children: [
+                      Text(
+                        item.name +
+                            (item.isTaken != null
+                                ? ' (already fulfilled)'
+                                : ''),
+                        style: item.isTaken != null
+                            ? TextStyle(color: grey)
+                            : null,
+                      ),
+                      const Spacer(),
+                      Text(
+                        '~${5 * (item.price / 5).round()} €',
+                        style: item.isTaken != null
+                            ? TextStyle(color: grey)
+                            : null,
+                      ),
+                    ],
+                  ),
+                  subtitle: Text(
+                    item.brand,
+                    style: item.isTaken != null ? TextStyle(color: grey) : null,
+                  ),
+                  leading: Icon(
+                    Icons.redeem,
+                    color: item.isTaken != null ? grey : null,
+                  ),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return HomePage(argId: item.id);
+                      },
+                    ),
+                  ),
+                );
+              },
             ),
-            leading: Icon(
-              Icons.redeem,
-              color: item.isTaken != null ? grey : null,
-            ),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (BuildContext context) {
-                  return HomePage(argId: item.id);
-                },
-              ),
-            ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
@@ -218,12 +238,14 @@ class ListAllItems extends StatelessWidget {
 
 class MyPage extends StatelessWidget {
   final Item item;
+  final bool taken;
   final DatabaseReference ref;
 
   const MyPage({
     Key? key,
     required this.item,
     required this.ref,
+    this.taken = false,
   }) : super(key: key);
 
   @override
@@ -250,10 +272,13 @@ class MyPage extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: TextButton(
                   onPressed: () async {
-                    var snapshot = await ref.child('isTaken').get();
-                    if (snapshot.value == null) {
-                      await ref.update(
-                          {'isTaken': DateTime.now().toIso8601String()});
+                    DataSnapshot? snapshot;
+                    if (!taken) snapshot = await ref.child('isTaken').get();
+                    if (snapshot == null || snapshot.value == null) {
+                      if (!taken) {
+                        await ref.update(
+                            {'isTaken': DateTime.now().toIso8601String()});
+                      }
                       await launchUrl(Uri.parse(item.url));
                     } else {
                       // ignore: use_build_context_synchronously
@@ -269,7 +294,7 @@ class MyPage extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.all(20.0),
                 child: SelectableText(
-                    "Google Germany GmbH\nNina Henkel\nErika-Mann-Str. 33\n80636 München"),
+                    "Google Germany GmbH\nNina Henkel (this name has to be included for tracking purposes)\nErika-Mann-Str. 33\n80636 München"),
               ),
               const SizedBox(height: 10),
               Row(
