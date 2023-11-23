@@ -180,7 +180,7 @@ class ListAllItems extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              '${allItems.where((item) => item.isTaken != null).length} out of the ${allItems.length} gifts are gone already - take part!',
+              '${allItems.where((item) => item.isTaken != null).length} out of the 100 wishes are fulfilled already - take part!',
               style: const TextStyle(fontSize: 20),
             ),
           ),
