@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'firebase_options.dart';
 import 'item.dart';
+import 'snow_animation.dart';
 
 Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -173,65 +174,79 @@ class ListAllItems extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print(allItems.length);
-    return SizedBox(
-      width: 800,
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              '${allItems.where((item) => item.isTaken != null).length} out of the 100 wishes are fulfilled already - take part!',
-              style: const TextStyle(fontSize: 20),
+    return Stack(
+      children: [
+        SnowWidget(
+          isRunning: true,
+          totalSnow: (MediaQuery.of(context).size.height / 30).round(),
+          speed: 1,
+        ),
+        Align(
+          alignment: Alignment.center,
+          child: SizedBox(
+            width: 800,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    '${allItems.where((item) => item.isTaken != null).length} out of the 100 wishes are fulfilled already - take part!',
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: allItems.length,
+                    itemBuilder: (context, index) {
+                      var item = allItems[index];
+                      return ListTile(
+                        title: Row(
+                          children: [
+                            Text(
+                              item.name +
+                                  (item.isTaken != null
+                                      ? ' (already fulfilled)'
+                                      : ''),
+                              style: item.isTaken != null
+                                  ? TextStyle(color: grey)
+                                  : null,
+                            ),
+                            const Spacer(),
+                            Text(
+                              '~${5 * (item.price / 5).round()} €',
+                              style: item.isTaken != null
+                                  ? TextStyle(color: grey)
+                                  : null,
+                            ),
+                          ],
+                        ),
+                        subtitle: Text(
+                          item.brand,
+                          style: item.isTaken != null
+                              ? TextStyle(color: grey)
+                              : null,
+                        ),
+                        leading: Icon(
+                          Icons.redeem,
+                          color: item.isTaken != null ? grey : null,
+                        ),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (BuildContext context) {
+                              return HomePage(argId: item.id);
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: allItems.length,
-              itemBuilder: (context, index) {
-                var item = allItems[index];
-                return ListTile(
-                  title: Row(
-                    children: [
-                      Text(
-                        item.name +
-                            (item.isTaken != null
-                                ? ' (already fulfilled)'
-                                : ''),
-                        style: item.isTaken != null
-                            ? TextStyle(color: grey)
-                            : null,
-                      ),
-                      const Spacer(),
-                      Text(
-                        '~${5 * (item.price / 5).round()} €',
-                        style: item.isTaken != null
-                            ? TextStyle(color: grey)
-                            : null,
-                      ),
-                    ],
-                  ),
-                  subtitle: Text(
-                    item.brand,
-                    style: item.isTaken != null ? TextStyle(color: grey) : null,
-                  ),
-                  leading: Icon(
-                    Icons.redeem,
-                    color: item.isTaken != null ? grey : null,
-                  ),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute<void>(
-                      builder: (BuildContext context) {
-                        return HomePage(argId: item.id);
-                      },
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
