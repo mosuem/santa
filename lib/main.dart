@@ -173,17 +173,17 @@ class ShowAllItems extends StatelessWidget {
         builder: (context, event) {
           if (!event.hasData) return const Text('Loading items...');
           var allItems = event.data!.snapshot.value as Map<String, dynamic>;
+          var allItems2 = allItems.entries.map((e) {
+            var itemMap = e.value as Map<String, dynamic>;
+            itemMap['id'] = e.key;
+            var item = Item.fromMap(itemMap);
+            return item;
+          }).toList()
+            ..sort((a, b) => a.id.compareTo(b.id));
           return ListAllItems(
-              allItems: allItems.entries
-                  .map((e) {
-                    var itemMap = e.value as Map<String, dynamic>;
-                    itemMap['id'] = e.key;
-                    var item = Item.fromMap(itemMap);
-                    return item;
-                  })
-                  .where((e) => !e.physical)
-                  .toList()
-                ..sort((a, b) => a.id.compareTo(b.id)));
+            allItems: allItems2.where((e) => !e.physical).toList(),
+            numTaken: allItems2.where((item) => item.isTaken != null).length,
+          );
         });
   }
 }
@@ -194,9 +194,11 @@ class ListAllItems extends StatelessWidget {
   const ListAllItems({
     super.key,
     required this.allItems,
+    required this.numTaken,
   });
 
   final List<Item> allItems;
+  final int numTaken;
 
   @override
   Widget build(BuildContext context) {
@@ -217,7 +219,7 @@ class ListAllItems extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    '${allItems.where((item) => item.isTaken != null).length} out of the 100 wishes are fulfilled already - take part!',
+                    '$numTaken out of the 100 wishes are fulfilled already - take part!',
                     style: const TextStyle(fontSize: 20),
                   ),
                 ),
