@@ -23,7 +23,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.red.shade300),
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      initialRoute: '/',
+      routes: {
+        // When navigating to the "/" route, build the FirstScreen widget.
+        '/': (context) => const HomePage(),
+      },
     );
   }
 }
@@ -34,11 +38,21 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var id = argId ?? Uri.base.queryParameters['id'];
+    var queryParameter = Uri.base.queryParameters['id'];
+    var id = argId ?? queryParameter;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Die Arche München Toy Appeal'),
+        actions: [
+          if (queryParameter != null)
+            IconButton(
+              onPressed: () {
+                launchUrl(Uri.parse('https://toy-appeal-muc.web.app/'));
+              },
+              icon: const Icon(Icons.home),
+            )
+        ],
       ),
       body: Center(
         child: switch (id) {
@@ -58,79 +72,90 @@ class ShowSingleItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ref = FirebaseDatabase.instance.ref(id);
-    return StreamBuilder(
-        stream: ref.onValue,
-        builder: (context, event) {
-          if (!event.hasData) return const CircularProgressIndicator();
-          final itemMap = event.data!;
-          var map = itemMap.snapshot.value as Map<String, dynamic>;
-          map['id'] = id;
-          final item = Item.fromMap(map);
+    return Stack(
+      children: [
+        SnowWidget(
+          isRunning: true,
+          totalSnow: (MediaQuery.of(context).size.height / 30).round(),
+          speed: 1,
+        ),
+        StreamBuilder(
+            stream: ref.onValue,
+            builder: (context, event) {
+              if (!event.hasData) return const CircularProgressIndicator();
+              final itemMap = event.data!;
+              var map = itemMap.snapshot.value as Map<String, dynamic>;
+              map['id'] = id;
+              final item = Item.fromMap(map);
 
-          if (item.id.isEmpty) {
-            throw ArgumentError('No item with the id $id exists.');
-          }
+              if (item.id.isEmpty) {
+                throw ArgumentError('No item with the id $id exists.');
+              }
 
-          if (item.isTaken == null) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                    'You can fulfill a wish for ${item.number > 1 ? '${item.number} times' : ''} "${item.name}" from ${item.brand}, which costs ${item.price.toStringAsFixed(2)} € ${item.number > 1 ? 'total' : ''}(excluding delivery)'),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: () => launchUrl(Uri.parse(item.snipit)),
-                  child: const Text('Preview the wish'),
-                ),
-                const SizedBox(height: 100),
-                Row(
+              if (item.isTaken == null) {
+                return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+                  children: <Widget>[
+                    Text(
+                        'You can fulfill a wish for ${item.number > 1 ? '${item.number} times' : ''} "${item.name}" from ${item.brand}, which costs ${item.price.toStringAsFixed(2)} € ${item.number > 1 ? 'total' : ''}(excluding delivery)'),
+                    const SizedBox(height: 10),
+                    TextButton(
+                      onPressed: () => launchUrl(Uri.parse(item.snipit)),
+                      child: const Text('Preview the wish'),
+                    ),
+                    const SizedBox(height: 100),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            // ignore: use_build_context_synchronously
+                            Navigator.push<void>(
+                              context,
+                              MaterialPageRoute<void>(
+                                builder: (BuildContext context) => MyPage(
+                                  item: item,
+                                  ref: ref,
+                                ),
+                              ),
+                            );
+                          },
+                          child:
+                              const Text('I would like to fulfill this wish!'),
+                        ),
+                      ],
+                    )
+                  ],
+                );
+              } else {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                        'The wish ${item.name} from ${item.brand} is already fulfilled by somebody!'),
+                    const SizedBox(height: 10),
                     ElevatedButton(
-                      onPressed: () async {
-                        // ignore: use_build_context_synchronously
+                      onPressed: () {
                         Navigator.push<void>(
                           context,
                           MaterialPageRoute<void>(
                             builder: (BuildContext context) => MyPage(
                               item: item,
                               ref: ref,
+                              taken: true,
                             ),
                           ),
                         );
                       },
-                      child: const Text('I would like to fulfill this wish!'),
-                    ),
+                      child: const Text(
+                          'It was me, please show me the link again'),
+                    )
                   ],
-                )
-              ],
-            );
-          } else {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                    'The wish ${item.name} from ${item.brand} is already fulfilled by somebody!'),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push<void>(
-                      context,
-                      MaterialPageRoute<void>(
-                        builder: (BuildContext context) => MyPage(
-                          item: item,
-                          ref: ref,
-                          taken: true,
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Text('It was me, please show me the link again'),
-                )
-              ],
-            );
-          }
-        });
+                );
+              }
+            }),
+      ],
+    );
   }
 }
 
@@ -269,6 +294,15 @@ class MyPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Die Arche München Toy Appeal'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.popUntil(context, (route) => false);
+              Navigator.pushNamed(context, '/');
+            },
+            icon: const Icon(Icons.home),
+          )
+        ],
       ),
       body: Center(
         child: Padding(
