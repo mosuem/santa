@@ -92,4 +92,9 @@ class Item {
         physical.hashCode ^
         isTaken.hashCode;
   }
+
+  @override
+  String toString() {
+    return 'Item(id: $id, description: $description, name: $name, number: $number, _price: $_price, brand: $brand, url: $url, snipit: $snipit, physical: $physical, isTaken: $isTaken)';
+  }
 }

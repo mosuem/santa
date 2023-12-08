@@ -36,6 +36,17 @@ class MainApp extends StatelessWidget {
           ),
         ),
         VerticalLine(
+          x: DateTime(2023, 12, 4, 18, 46)
+              .difference(startTime)
+              .inHours
+              .toDouble(),
+          label: VerticalLineLabel(
+            show: true,
+            alignment: Alignment.topRight,
+            labelResolver: (p0) => 'misc-muc',
+          ),
+        ),
+        VerticalLine(
           x: DateTime(2023, 11, 27, 10, 44)
               .difference(startTime)
               .inHours
