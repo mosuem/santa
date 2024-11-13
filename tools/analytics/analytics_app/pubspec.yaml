@@ -11,7 +11,7 @@ dependencies:
     sdk: flutter
   santa:
     path: ../../../
-  fl_chart: ^0.65.0
+  fl_chart: ^0.69.0
 
 dev_dependencies:
   flutter_test:

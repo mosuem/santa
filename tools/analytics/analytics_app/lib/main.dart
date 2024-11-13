@@ -119,7 +119,7 @@ class MainApp extends StatelessWidget {
           ),
         ),
       ],
-      gridData: FlGridData(
+      gridData: const FlGridData(
         horizontalInterval: 5,
         verticalInterval: 24,
       ),

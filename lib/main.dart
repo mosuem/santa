@@ -172,12 +172,12 @@ class ShowAllItems extends StatelessWidget {
         stream: FirebaseDatabase.instance.ref().onValue,
         builder: (context, event) {
           if (!event.hasData) return const Text('Loading items...');
-          var allItems = event.data!.snapshot.value as Map<String, dynamic>;
-          var allItems2 = allItems.entries.map((e) {
-            var itemMap = e.value as Map<String, dynamic>;
-            itemMap['id'] = e.key;
-            var item = Item.fromMap(itemMap);
-            return item;
+          var allItems2 = (event.data!.snapshot.value as Map<Object?, dynamic>)
+              .entries
+              .map((entry) {
+            var itemMap = Map<String, dynamic>.from(entry.value);
+            itemMap['id'] = entry.key;
+            return Item.fromMap(itemMap);
           }).toList()
             ..sort((a, b) => a.id.compareTo(b.id));
           return ListAllItems(
@@ -286,11 +286,11 @@ class MyPage extends StatelessWidget {
   final DatabaseReference ref;
 
   const MyPage({
-    Key? key,
+    super.key,
     required this.item,
     required this.ref,
     this.taken = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -8,11 +8,10 @@ class SnowWidget extends StatefulWidget {
   final bool isRunning;
 
   const SnowWidget(
-      {Key? key,
+      {super.key,
       required this.totalSnow,
       required this.speed,
-      required this.isRunning})
-      : super(key: key);
+      required this.isRunning});
 
   @override
   SnowWidgetState createState() => SnowWidgetState();
@@ -874,7 +873,7 @@ class SnowPainter extends CustomPainter {
       path_0.close();
 
       Paint paint = Paint()..style = PaintingStyle.fill;
-      paint.color = Colors.blueGrey[400]!.withOpacity(1.0);
+      paint.color = Colors.blueGrey[400]!.withAlpha(255);
       canvas.drawPath(path_0, paint);
     }
   }
