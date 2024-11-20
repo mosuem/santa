@@ -172,14 +172,13 @@ class ShowAllItems extends StatelessWidget {
         stream: FirebaseDatabase.instance.ref().onValue,
         builder: (context, event) {
           if (!event.hasData) return const Text('Loading items...');
-          var allItems2 = (event.data!.snapshot.value as Map<Object?, dynamic>)
-              .entries
-              .map((entry) {
+          var allItems2 =
+              (event.data!.snapshot.value as Map).entries.map((entry) {
             var itemMap = Map<String, dynamic>.from(entry.value);
             itemMap['id'] = entry.key;
             return Item.fromMap(itemMap);
           }).toList()
-            ..sort((a, b) => a.id.compareTo(b.id));
+                ..sort((a, b) => a.id.compareTo(b.id));
           return ListAllItems(
             allItems: allItems2.where((e) => !e.physical).toList(),
             numTaken: allItems2.where((item) => item.isTaken != null).length,
