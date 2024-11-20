@@ -27,36 +27,32 @@ class Item {
 
   double get price => _price * number;
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'description': description,
-      'name': name,
-      'number': number.toString(),
-      'price': _price.toString(),
-      'brand': brand,
-      'physical': physical.toString(),
-      'url': url,
-      'snipit': snipit,
-      'isTaken': isTaken?.toIso8601String(),
-    };
-  }
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'description': description,
+        'name': name,
+        'number': number.toString(),
+        'price': _price.toString(),
+        'brand': brand,
+        'physical': physical.toString(),
+        'url': url,
+        'snipit': snipit,
+        'isTaken': isTaken?.toIso8601String(),
+      };
 
-  factory Item.fromMap(Map<String, dynamic> map) {
-    return Item(
-      id: map['id'] ?? '',
-      description: map['description'] ?? '',
-      name: map['name'] ?? '',
-      number: int.tryParse(map['number']) ?? 1,
-      price: double.tryParse(map['price']) ?? 0,
-      brand: map['brand'] ?? '',
-      physical: bool.tryParse(map['physical']) ?? false,
-      url: map['url'] ?? '',
-      snipit: map['snipit'] ?? '',
-      isTaken:
-          map['isTaken'] != null ? DateTime.tryParse(map['isTaken']) : null,
-    );
-  }
+  factory Item.fromMap(Map map) => Item(
+        id: map['id'] ?? '',
+        description: map['description'] ?? '',
+        name: map['name'] ?? '',
+        number: int.tryParse(map['number']) ?? 1,
+        price: double.tryParse(map['price']) ?? 0,
+        brand: map['brand'] ?? '',
+        physical: bool.tryParse(map['physical']) ?? false,
+        url: map['url'] ?? '',
+        snipit: map['snipit'] ?? '',
+        isTaken:
+            map['isTaken'] != null ? DateTime.tryParse(map['isTaken']) : null,
+      );
 
   String toJson() => json.encode(toMap());
 

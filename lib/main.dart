@@ -77,7 +77,7 @@ class ShowSingleItem extends StatelessWidget {
         builder: (context, event) {
           if (!event.hasData) return const CircularProgressIndicator();
           final itemMap = event.data!;
-          var map = itemMap.snapshot.value as Map<String, dynamic>;
+          var map = itemMap.snapshot.value as Map;
           map['id'] = id;
           final item = Item.fromMap(map);
 

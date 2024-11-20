@@ -21,11 +21,10 @@ Future<void> main(List<String> args) async {
   JsonEncoder encoder = const JsonEncoder.withIndent('  ');
   var entries = total.entries.toList();
   var physical = Map.fromEntries(entries.take(30));
-  print(physical.length);
-  print(physical['0af6ba9e27aafab1f3b3968bd9d8d4e4e4b0d0a7']);
+  print('Physical: ${physical.length}');
   var virtual = Map.fromEntries(entries.skip(30));
-  print(virtual.length);
-  print(total.length);
+  print('Virtual: ${virtual.length}');
+  print('Total: ${total.length}');
   File('data/physical_hashed.json')
       .writeAsStringSync(encoder.convert(physical));
   File('data/virtual_hashed.json').writeAsStringSync(encoder.convert(virtual));
