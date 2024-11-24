@@ -11,6 +11,7 @@ class Item {
   final String snipit;
   final bool physical;
   final DateTime? isTaken;
+  final bool paypal;
 
   Item({
     required double price,
@@ -23,6 +24,7 @@ class Item {
     required this.url,
     required this.snipit,
     this.isTaken,
+    required this.paypal,
   }) : _price = price;
 
   double get price => _price * number;
@@ -38,6 +40,7 @@ class Item {
         'url': url,
         'snipit': snipit,
         'isTaken': isTaken?.toIso8601String(),
+        'paypal': false,
       };
 
   factory Item.fromMap(Map map) => Item(
@@ -52,6 +55,7 @@ class Item {
         snipit: map['snipit'] ?? '',
         isTaken:
             map['isTaken'] != null ? DateTime.tryParse(map['isTaken']) : null,
+        paypal: bool.tryParse(map['paypal']) ?? false,
       );
 
   String toJson() => json.encode(toMap());

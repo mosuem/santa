@@ -316,10 +316,8 @@ class MyPage extends StatelessWidget {
             children: <Widget>[
               const Text('Thanks for participating! Now follow these steps:'),
               const SizedBox(height: 10),
-              item.number <= 1
-                  ? const Text('1. Order the product:')
-                  : Text(
-                      '1. Order exactly ${item.number} units of the product by following this link:'),
+              const Text(
+                  '1. Order the product yourself: ONLY click her if you will fulfill this wish by ordering yourself. This will mark the wish as fulfilled for others.'),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextButton(
@@ -328,8 +326,10 @@ class MyPage extends StatelessWidget {
                     if (!taken) snapshot = await ref.child('isTaken').get();
                     if (snapshot == null || snapshot.value == null) {
                       if (!taken) {
-                        await ref.update(
-                            {'isTaken': DateTime.now().toIso8601String()});
+                        await ref.update({
+                          'isTaken': DateTime.now().toIso8601String(),
+                          'paypal': false,
+                        });
                       }
                       await launchUrl(Uri.parse(item.url));
                     } else {
@@ -338,11 +338,37 @@ class MyPage extends StatelessWidget {
                     }
                   },
                   child: const Text(
-                      'ONLY click here if you will fulfill this wish. This will mark the wish as fulfilled for others.'),
+                      'Order the product yourself. This will mark the wish as fulfilled for others.'),
                 ),
               ),
               const Text(
-                  '2. Send it to this address. Remember to include the name for tracking purposes. Alternatively, bring it to desk 5Z1C6A (@mosum) in MUC-ARP.'),
+                  '2. Let Nina & Moritz order for you by donating THE VALUE of the item via Paypal: Only click here if you will fulfill this wish by donating the value of the item via Paypal. This will mark the wish as fulfilled for others. Add the name of the item in the description of the Paypal money transfer.'),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextButton(
+                  onPressed: () async {
+                    DataSnapshot? snapshot;
+                    if (!taken) snapshot = await ref.child('isTaken').get();
+                    if (snapshot == null || snapshot.value == null) {
+                      if (!taken) {
+                        await ref.update({
+                          'isTaken': DateTime.now().toIso8601String(),
+                          'paypal': true,
+                        });
+                      }
+                      await launchUrl(Uri.parse(
+                          'https://www.paypal.com/pool/99V6ladR9i?sr=wccr'));
+                    } else {
+                      // ignore: use_build_context_synchronously
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Text(
+                      'Donate ${item.price.toStringAsFixed(2)} € (the value of the item) via Paypal. This will mark the wish as fulfilled for others.'),
+                ),
+              ),
+              const Text(
+                  '3. When ordering yourself please send the item to the address below. Alternatively, bring it to desk 5Z1C6A (@mosum) in MUC-ARP.'),
               const Padding(
                 padding: EdgeInsets.all(20.0),
                 child: SelectableText(
@@ -355,8 +381,8 @@ class MyPage extends StatelessWidget {
                       'For any questions, consult the FAQs at'),
                   TextButton(
                     onPressed: () =>
-                        launchUrl(Uri.parse('http://go/toy-appeal-muc-2023')),
-                    child: const Text('go/toy-appeal-muc-2023'),
+                        launchUrl(Uri.parse('http://go/toy-appeal-muc-2024')),
+                    child: const Text('go/toy-appeal-muc-2024'),
                   ),
                   const SelectableText(', or contact @henkel or @mosum.'),
                 ],
