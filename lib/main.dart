@@ -102,7 +102,9 @@ class ShowSingleItem extends StatelessWidget {
                           'You can fulfill a wish for ${item.number > 1 ? '${item.number} times' : ''} "${item.name}" from ${item.brand}, which costs ${item.price.toStringAsFixed(2)} € ${item.number > 1 ? 'total' : ''}(excluding delivery)'),
                       const SizedBox(height: 10),
                       TextButton(
-                        onPressed: () => launchUrl(Uri.parse(item.snipit)),
+                        onPressed: item.snipit.isNotEmpty
+                            ? () => launchUrl(Uri.parse(item.snipit))
+                            : null,
                         child: const Text('Preview the wish'),
                       ),
                       const SizedBox(height: 100),
