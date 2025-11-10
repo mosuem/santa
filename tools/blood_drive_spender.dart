@@ -21,7 +21,7 @@ Future<void> main(List<String> args) async {
         .map((e) => RegExp('\\((\\d)\\)').firstMatch(e)!.group(1))
         .map((e) => int.parse(e!))
         .fold(0, (value, element) => value + element);
-    print('$map/120 frei');
+    print('$map/110 frei');
   } finally {
     client.close();
   }
