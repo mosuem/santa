@@ -32,7 +32,7 @@ class SnowWidgetState extends State<SnowWidget>
     init();
   }
 
-  init() {
+  void init() {
     if (controller == null) {
       controller = AnimationController(
           lowerBound: 0,
@@ -60,7 +60,7 @@ class SnowWidgetState extends State<SnowWidget>
     super.dispose();
   }
 
-  _createSnow() {
+  void _createSnow() {
     _snows = <Snow>[];
     for (var i = 0; i < widget.totalSnow; i++) {
       _snows.add(Snow(
@@ -71,7 +71,7 @@ class SnowWidgetState extends State<SnowWidget>
     }
   }
 
-  update() {
+  void update() {
     angle += 0.01;
     if (_snows.isEmpty || widget.totalSnow != _snows.length) {
       _createSnow();
