@@ -358,8 +358,8 @@ class MyPage extends StatelessWidget {
                           'paypal': true,
                         });
                       }
-                      await launchUrl(Uri.parse(
-                          'https://www.paypal.com/pool/99V6ladR9i?sr=wccr'));
+                      await launchUrl(
+                          Uri.parse('https://www.paypal.com/pool/9jVIHAzBRX'));
                     } else {
                       // ignore: use_build_context_synchronously
                       Navigator.pop(context);
@@ -383,8 +383,8 @@ class MyPage extends StatelessWidget {
                       'For any questions, consult the FAQs at'),
                   TextButton(
                     onPressed: () =>
-                        launchUrl(Uri.parse('http://go/toy-appeal-muc-2024')),
-                    child: const Text('go/toy-appeal-muc-2024'),
+                        launchUrl(Uri.parse('http://go/toy-appeal-muc-2025')),
+                    child: const Text('go/toy-appeal-muc-2025'),
                   ),
                   const SelectableText(', or contact @henkel or @mosum.'),
                 ],
