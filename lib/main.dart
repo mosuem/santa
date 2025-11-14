@@ -51,7 +51,7 @@ class HomePage extends StatelessWidget {
                 launchUrl(Uri.parse('https://toy-appeal-muc.web.app/'));
               },
               icon: const Icon(Icons.home),
-            )
+            ),
         ],
       ),
       body: Center(
@@ -73,119 +73,117 @@ class ShowSingleItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final ref = FirebaseDatabase.instance.ref(id);
     return StreamBuilder(
-        stream: ref.onValue,
-        builder: (context, event) {
-          if (!event.hasData) return const CircularProgressIndicator();
-          final itemMap = event.data!;
-          var map = itemMap.snapshot.value as Map;
-          map['id'] = id;
-          final item = Item.fromMap(map);
+      stream: ref.onValue,
+      builder: (context, event) {
+        if (!event.hasData) return const CircularProgressIndicator();
+        final itemMap = event.data!;
+        var map = itemMap.snapshot.value as Map;
+        map['id'] = id;
+        final item = Item.fromMap(map);
 
-          if (item.id.isEmpty) {
-            throw ArgumentError('No item with the id $id exists.');
-          }
+        if (item.id.isEmpty) {
+          throw ArgumentError('No item with the id $id exists.');
+        }
 
-          if (item.isTaken == null) {
-            return Stack(
-              children: [
-                SnowWidget(
-                  isRunning: true,
-                  totalSnow: (MediaQuery.of(context).size.height / 30).round(),
-                  speed: 1,
-                ),
-                Align(
-                  alignment: Alignment.center,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                          'You can fulfill a wish for ${item.number > 1 ? '${item.number} times' : ''} "${item.name}" from ${item.brand}, which costs ${item.price.toStringAsFixed(2)} € ${item.number > 1 ? 'total' : ''}(excluding delivery)'),
-                      const SizedBox(height: 10),
-                      TextButton(
-                        onPressed: item.snipit.isNotEmpty
-                            ? () => launchUrl(Uri.parse(item.snipit))
-                            : null,
-                        child: const Text('Preview the wish'),
-                      ),
-                      const SizedBox(height: 100),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () async {
-                              // ignore: use_build_context_synchronously
-                              Navigator.push<void>(
-                                context,
-                                MaterialPageRoute<void>(
-                                  builder: (BuildContext context) => MyPage(
-                                    item: item,
-                                    ref: ref,
-                                  ),
-                                ),
-                              );
-                            },
-                            child: const Text(
-                                'I would like to fulfill this wish!'),
+        if (item.isTaken == null) {
+          return Stack(
+            children: [
+              SnowWidget(
+                isRunning: true,
+                totalSnow: (MediaQuery.of(context).size.height / 30).round(),
+                speed: 1,
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'You can fulfill a wish for ${item.number > 1 ? '${item.number} times' : ''} "${item.name}" from ${item.brand}, which costs ${item.price.toStringAsFixed(2)} € ${item.number > 1 ? 'total' : ''}(excluding delivery)',
+                    ),
+                    const SizedBox(height: 10),
+                    TextButton(
+                      onPressed: item.snipit.isNotEmpty
+                          ? () => launchUrl(Uri.parse(item.snipit))
+                          : null,
+                      child: const Text('Preview the wish'),
+                    ),
+                    const SizedBox(height: 100),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            // ignore: use_build_context_synchronously
+                            Navigator.push<void>(
+                              context,
+                              MaterialPageRoute<void>(
+                                builder: (BuildContext context) =>
+                                    MyPage(item: item, ref: ref),
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            'I would like to fulfill this wish!',
                           ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            );
-          } else {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                    'The wish ${item.name} from ${item.brand} is already fulfilled by somebody!'),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push<void>(
-                      context,
-                      MaterialPageRoute<void>(
-                        builder: (BuildContext context) => MyPage(
-                          item: item,
-                          ref: ref,
-                          taken: true,
                         ),
-                      ),
-                    );
-                  },
-                  child: const Text('It was me, please show me the link again'),
-                )
-              ],
-            );
-          }
-        });
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        } else {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                'The wish ${item.name} from ${item.brand} is already fulfilled by somebody!',
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push<void>(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) =>
+                          MyPage(item: item, ref: ref, taken: true),
+                    ),
+                  );
+                },
+                child: const Text('It was me, please show me the link again'),
+              ),
+            ],
+          );
+        }
+      },
+    );
   }
 }
 
 class ShowAllItems extends StatelessWidget {
-  const ShowAllItems({
-    super.key,
-  });
+  const ShowAllItems({super.key});
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: FirebaseDatabase.instance.ref().onValue,
-        builder: (context, event) {
-          if (!event.hasData) return const Text('Loading items...');
-          var allItems2 =
-              (event.data!.snapshot.value as Map).entries.map((entry) {
-            var itemMap = Map<String, dynamic>.from(entry.value);
-            itemMap['id'] = entry.key;
-            return Item.fromMap(itemMap);
-          }).toList()
-                ..sort((a, b) => a.id.compareTo(b.id));
-          return ListAllItems(
-            allItems: allItems2.where((e) => !e.physical).toList(),
-            numTaken: allItems2.where((item) => item.isTaken != null).length,
-          );
-        });
+      stream: FirebaseDatabase.instance.ref().onValue,
+      builder: (context, event) {
+        if (!event.hasData) return const Text('Loading items...');
+        var allItems2 = (event.data!.snapshot.value as Map).entries.map((
+          entry,
+        ) {
+          var itemMap = Map<String, dynamic>.from(entry.value);
+          itemMap['id'] = entry.key;
+          return Item.fromMap(itemMap);
+        }).toList()..sort((a, b) => a.id.compareTo(b.id));
+        return ListAllItems(
+          allItems: allItems2.where((e) => !e.physical).toList(),
+          numTaken: allItems2.where((item) => item.isTaken != null).length,
+        );
+      },
+    );
   }
 }
 
@@ -306,7 +304,7 @@ class MyPage extends StatelessWidget {
               Navigator.pushNamed(context, '/');
             },
             icon: const Icon(Icons.home),
-          )
+          ),
         ],
       ),
       body: Center(
@@ -319,7 +317,8 @@ class MyPage extends StatelessWidget {
               const Text('Thanks for participating! Now follow these steps:'),
               const SizedBox(height: 10),
               const Text(
-                  '1. Order the product yourself: ONLY click her if you will fulfill this wish by ordering yourself. This will mark the wish as fulfilled for others.'),
+                '1. Order the product yourself: ONLY click her if you will fulfill this wish by ordering yourself. This will mark the wish as fulfilled for others.',
+              ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextButton(
@@ -340,11 +339,13 @@ class MyPage extends StatelessWidget {
                     }
                   },
                   child: const Text(
-                      'Order the product yourself. This will mark the wish as fulfilled for others.'),
+                    'Order the product yourself. This will mark the wish as fulfilled for others.',
+                  ),
                 ),
               ),
               const Text(
-                  '2. Let Nina & Moritz order for you by donating THE VALUE of the item via Paypal: Only click here if you will fulfill this wish by donating the value of the item via Paypal. This will mark the wish as fulfilled for others. Add the name of the item in the description of the Paypal money transfer.'),
+                '2. Let Nina & Moritz order for you by donating THE VALUE of the item via Paypal: Only click here if you will fulfill this wish by donating the value of the item via Paypal. This will mark the wish as fulfilled for others. Add the name of the item in the description of the Paypal money transfer.',
+              ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextButton(
@@ -359,28 +360,33 @@ class MyPage extends StatelessWidget {
                         });
                       }
                       await launchUrl(
-                          Uri.parse('https://www.paypal.com/pool/9jVIHAzBRX'));
+                        Uri.parse('https://www.paypal.com/pool/9jVIHAzBRX'),
+                      );
                     } else {
                       // ignore: use_build_context_synchronously
                       Navigator.pop(context);
                     }
                   },
                   child: Text(
-                      'Donate ${item.price.toStringAsFixed(2)} € (the value of the item) via Paypal. This will mark the wish as fulfilled for others.'),
+                    'Donate ${item.price.toStringAsFixed(2)} € (the value of the item) via Paypal. This will mark the wish as fulfilled for others.',
+                  ),
                 ),
               ),
               const Text(
-                  '3. When ordering yourself please send the item to the address below. Alternatively, bring it to desk 5Z1C6A (@mosum) in MUC-ARP.'),
+                '3. When ordering yourself please send the item to the address below. Alternatively, bring it to desk 5Z1C6C (@henkel) in MUC-ARP.',
+              ),
               const Padding(
                 padding: EdgeInsets.all(20.0),
                 child: SelectableText(
-                    "Google Germany GmbH\nNina Henkel (this name has to be included for tracking purposes)\nErika-Mann-Str. 33\n80636 München"),
+                  "Google Germany GmbH\nNina Henkel (this name has to be included for tracking purposes)\nErika-Mann-Str. 33\n80636 München",
+                ),
               ),
               const SizedBox(height: 10),
               Row(
                 children: [
                   const SelectableText(
-                      'For any questions, consult the FAQs at'),
+                    'For any questions, consult the FAQs at',
+                  ),
                   TextButton(
                     onPressed: () =>
                         launchUrl(Uri.parse('http://go/toy-appeal-muc-2025')),
