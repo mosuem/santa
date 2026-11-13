@@ -149,6 +149,7 @@ class _ScreenshotWorkflowPageState extends State<ScreenshotWorkflowPage> {
   }
 
   Future<void> _initAll() async {
+    if (Platform.environment.containsKey('FLUTTER_TEST')) return;
     _santaRoot = _locateSantaRoot();
     await _baselineCurrentClipboardAndFiles();
     _loadTsv();
