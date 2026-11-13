@@ -40,22 +40,35 @@ class Item {
         'url': url,
         'snipit': snipit,
         'isTaken': isTaken?.toIso8601String(),
-        'paypal': false,
+        'paypal': paypal,
       };
 
+  static bool _parseBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is String) {
+      return bool.tryParse(value, caseSensitive: false) ?? false;
+    }
+    return false;
+  }
+
   factory Item.fromMap(Map map) => Item(
-        id: map['id'] ?? '',
-        description: map['description'] ?? '',
-        name: map['name'] ?? '',
-        number: int.tryParse(map['number']) ?? 1,
-        price: double.tryParse(map['price']) ?? 0,
-        brand: map['brand'] ?? '',
-        physical: bool.tryParse(map['physical']) ?? false,
-        url: map['url'] ?? '',
-        snipit: map['snipit'] ?? '',
-        isTaken:
-            map['isTaken'] != null ? DateTime.tryParse(map['isTaken']) : null,
-        paypal: bool.tryParse(map['paypal']) ?? false,
+        id: map['id']?.toString() ?? '',
+        description: map['description']?.toString() ?? '',
+        name: map['name']?.toString() ?? '',
+        number: map['number'] is int
+            ? map['number'] as int
+            : (int.tryParse(map['number']?.toString() ?? '') ?? 1),
+        price: map['price'] is num
+            ? (map['price'] as num).toDouble()
+            : (double.tryParse(map['price']?.toString() ?? '') ?? 0),
+        brand: map['brand']?.toString() ?? '',
+        physical: _parseBool(map['physical']),
+        url: map['url']?.toString() ?? '',
+        snipit: map['snipit']?.toString() ?? '',
+        isTaken: map['isTaken'] != null
+            ? DateTime.tryParse(map['isTaken'].toString())
+            : null,
+        paypal: _parseBool(map['paypal']),
       );
 
   String toJson() => json.encode(toMap());

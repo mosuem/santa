@@ -1212,12 +1212,30 @@ class MyPage extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 6),
-                            Text(
-                              'Order ${item.number > 1 ? '${item.number} units of ' : ''}the item directly from ${item.brand} and ship it to the Munich office (or drop it off at desk 5Z1C6C in MUC-ARP) by December 14.',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                height: 1.45,
-                                color: _kMutedInk,
+                            Text.rich(
+                              TextSpan(
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  height: 1.45,
+                                  color: _kMutedInk,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text:
+                                        'Order ${item.number > 1 ? '${item.number} units of ' : ''}the item directly from ${item.brand} and either ship it to the Munich office ',
+                                  ),
+                                  const TextSpan(
+                                    text: 'addressed to Nina Henkel',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: _kInk,
+                                    ),
+                                  ),
+                                  const TextSpan(
+                                    text:
+                                        ' (important: always include "Nina Henkel" as recipient — do not address it to Google Germany GmbH alone!) or drop it off at desk 5Z1C6C in MUC-ARP by December 14.',
+                                  ),
+                                ],
                               ),
                             ),
                             const SizedBox(height: 14),
@@ -1271,11 +1289,11 @@ class MyPage extends StatelessWidget {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Shipping Address (include Nina Henkel for tracking):',
+                                          'Shipping Address (MUST include "Nina Henkel" as recipient):',
                                           style: TextStyle(
                                             fontSize: 12.5,
-                                            fontWeight: FontWeight.w600,
-                                            color: _kMutedInk,
+                                            fontWeight: FontWeight.w700,
+                                            color: _kCranberry,
                                           ),
                                         ),
                                         SizedBox(height: 6),
