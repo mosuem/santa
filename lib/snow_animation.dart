@@ -114,9 +114,13 @@ class SnowWidgetState extends State<SnowWidget>
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (_snows.isEmpty) {
+        if (constraints.maxWidth > 0 && constraints.maxHeight > 0) {
+          final needsInitialScatter = W == 0 || H == 0 || _snows.isEmpty;
           W = constraints.maxWidth;
           H = constraints.maxHeight;
+          if (needsInitialScatter) {
+            _createSnow();
+          }
         }
         return CustomPaint(
           willChange: widget.isRunning,
