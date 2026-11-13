@@ -4,6 +4,6 @@ import 'package:screenshot_app/main.dart';
 void main() {
   testWidgets('ScreenshotHelperApp renders', (WidgetTester tester) async {
     await tester.pumpWidget(const ScreenshotHelperApp());
-    expect(find.textContaining('Toy Appeal'), findsWidgets);
+    expect(find.textContaining('Screenshot'), findsWidgets);
   });
 }
