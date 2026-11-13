@@ -53,6 +53,17 @@ Future<ProcessResult> _convertToWebp(
 
 Future<void> main(List<String> args) async {
   final path = args.isNotEmpty ? args.first : 'data/input.tsv';
+  final inputFile = File(path);
+  if (!inputFile.existsSync()) {
+    stderr.writeln(
+      '$path not found (data/ is gitignored on the public repo).\n'
+      'Copy it from Cloudtop in one command:\n'
+      '  mkdir -p data && scp mosumbig.c.googlers.com:~/projects/santa/data/input.tsv data/input.tsv\n'
+      'Or export Blatt 1 of "Google Wünsche für Arche München 2026" as .tsv to $path.',
+    );
+    exitCode = 1;
+    return;
+  }
   final read = await readLTsv(path);
   final rawRows = read.toMap().toList();
 
