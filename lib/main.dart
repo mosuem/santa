@@ -1,11 +1,15 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'firebase_options.dart';
 import 'item.dart';
 import 'snow_animation.dart';
+
+const String paypalPoolUrl = 'https://www.paypal.com/pool/9uitkxMD0A';
+const String faqGoLink = 'go/toy-appeal-muc-2026';
 
 Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -95,41 +99,44 @@ class ShowSingleItem extends StatelessWidget {
               ),
               Align(
                 alignment: Alignment.center,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'You can fulfill a wish for ${item.number > 1 ? '${item.number} times' : ''} "${item.name}" from ${item.brand}, which costs ${item.price.toStringAsFixed(2)} € ${item.number > 1 ? 'total' : ''}(excluding delivery)',
-                    ),
-                    const SizedBox(height: 10),
-                    TextButton(
-                      onPressed: item.snipit.isNotEmpty
-                          ? () => launchUrl(Uri.parse(item.snipit))
-                          : null,
-                      child: const Text('Preview the wish'),
-                    ),
-                    const SizedBox(height: 100),
-                    Row(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24.0),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 700),
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () async {
-                            // ignore: use_build_context_synchronously
-                            Navigator.push<void>(
-                              context,
-                              MaterialPageRoute<void>(
-                                builder: (BuildContext context) =>
-                                    MyPage(item: item, ref: ref),
+                      children: <Widget>[
+                        Text(
+                          'You can fulfill a wish for ${item.number > 1 ? '${item.number} times ' : ''}"${item.name}" from ${item.brand}, which costs ${item.price.toStringAsFixed(2)} € ${item.number > 1 ? 'total ' : ''}(excluding delivery)',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 20),
+                        WishPreviewImage(item: item),
+                        const SizedBox(height: 32),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () async {
+                                // ignore: use_build_context_synchronously
+                                Navigator.push<void>(
+                                  context,
+                                  MaterialPageRoute<void>(
+                                    builder: (BuildContext context) =>
+                                        MyPage(item: item, ref: ref),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                'I would like to fulfill this wish!',
                               ),
-                            );
-                          },
-                          child: const Text(
-                            'I would like to fulfill this wish!',
-                          ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],
@@ -201,7 +208,6 @@ class ListAllItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(allItems.length);
     return Stack(
       children: [
         SnowWidget(
@@ -314,10 +320,15 @@ class MyPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              Text(
+                'Selected wish: ${item.name} (${item.price.toStringAsFixed(2)} €)',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 12),
               const Text('Thanks for participating! Now follow these steps:'),
               const SizedBox(height: 10),
               const Text(
-                '1. Order the product yourself: ONLY click her if you will fulfill this wish by ordering yourself. This will mark the wish as fulfilled for others.',
+                '1. Order the product yourself: ONLY click here if you will fulfill this wish by ordering yourself. This will mark the wish as fulfilled for others.',
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -347,29 +358,60 @@ class MyPage extends StatelessWidget {
                 '2. Let Nina & Moritz order for you by donating THE VALUE of the item via Paypal: Only click here if you will fulfill this wish by donating the value of the item via Paypal. This will mark the wish as fulfilled for others. Add the name of the item in the description of the Paypal money transfer.',
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextButton(
-                  onPressed: () async {
-                    DataSnapshot? snapshot;
-                    if (!taken) snapshot = await ref.child('isTaken').get();
-                    if (snapshot == null || snapshot.value == null) {
-                      if (!taken) {
-                        await ref.update({
-                          'isTaken': DateTime.now().toIso8601String(),
-                          'paypal': true,
-                        });
-                      }
-                      await launchUrl(
-                        Uri.parse('https://www.paypal.com/pool/9jVIHAzBRX'),
-                      );
-                    } else {
-                      // ignore: use_build_context_synchronously
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: Text(
-                    'Donate ${item.price.toStringAsFixed(2)} € (the value of the item) via Paypal. This will mark the wish as fulfilled for others.',
-                  ),
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                child: Wrap(
+                  spacing: 8.0,
+                  runSpacing: 4.0,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    TextButton(
+                      onPressed: () async {
+                        await Clipboard.setData(ClipboardData(text: item.name));
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Copied "${item.name}" to clipboard for PayPal description.',
+                              ),
+                            ),
+                          );
+                        }
+                        DataSnapshot? snapshot;
+                        if (!taken) snapshot = await ref.child('isTaken').get();
+                        if (snapshot == null || snapshot.value == null) {
+                          if (!taken) {
+                            await ref.update({
+                              'isTaken': DateTime.now().toIso8601String(),
+                              'paypal': true,
+                            });
+                          }
+                          await launchUrl(Uri.parse(paypalPoolUrl));
+                        } else {
+                          // ignore: use_build_context_synchronously
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: Text(
+                        'Donate ${item.price.toStringAsFixed(2)} € (the value of the item) via Paypal. This will mark the wish as fulfilled for others.',
+                      ),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        await Clipboard.setData(ClipboardData(text: item.name));
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Copied "${item.name}" to clipboard.',
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.copy, size: 16),
+                      label: const Text('Copy item name for PayPal note'),
+                    ),
+                  ],
                 ),
               ),
               const Text(
@@ -389,13 +431,73 @@ class MyPage extends StatelessWidget {
                   ),
                   TextButton(
                     onPressed: () =>
-                        launchUrl(Uri.parse('http://go/toy-appeal-muc-2025')),
-                    child: const Text('go/toy-appeal-muc-2025'),
+                        launchUrl(Uri.parse('http://$faqGoLink')),
+                    child: const Text(faqGoLink),
                   ),
                   const SelectableText(', or contact @henkel or @mosum.'),
                 ],
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class WishPreviewImage extends StatelessWidget {
+  const WishPreviewImage({super.key, required this.item});
+
+  final Item item;
+
+  @override
+  Widget build(BuildContext context) {
+    final relativePath = 'screenshots/${item.id}.webp';
+    final fullImageUri = Uri.base.resolve(relativePath);
+    return Tooltip(
+      message: 'Click to open full-size image',
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () => launchUrl(fullImageUri),
+          child: Container(
+            constraints: const BoxConstraints(maxHeight: 360, maxWidth: 600),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(8),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                relativePath,
+                fit: BoxFit.contain,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const SizedBox(
+                    height: 180,
+                    width: 180,
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  if (item.snipit.isNotEmpty) {
+                    return TextButton(
+                      onPressed: () => launchUrl(Uri.parse(item.snipit)),
+                      child: const Text('Preview the wish'),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
           ),
         ),
       ),
