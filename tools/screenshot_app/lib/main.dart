@@ -672,31 +672,10 @@ class _ScreenshotWorkflowPageState extends State<ScreenshotWorkflowPage> {
         appBar: AppBar(
           title: Text(
             _items.isEmpty
-                ? 'Toy Appeal Screenshot Helper'
-                : 'Toy Appeal Screenshots — $doneCount / ${_items.length} Done',
+                ? 'Screenshot Helper'
+                : 'Toy Appeal — $doneCount / ${_items.length} Done',
           ),
           actions: [
-            FilterChip(
-              label: const Text('Watch Clipboard & Screenshots'),
-              selected: _watchClipboardAndDirs,
-              onSelected: (v) => setState(() => _watchClipboardAndDirs = v),
-            ),
-            const SizedBox(width: 8),
-            FilterChip(
-              label: const Text('Propose Crop in App'),
-              tooltip:
-                  'When OFF: saves your Linux screenshot immediately & opens next URL.\n'
-                  'When ON: opens an adjustable proposed crop box before saving.',
-              selected: _proposeCropBeforeSave,
-              onSelected: (v) => setState(() => _proposeCropBeforeSave = v),
-            ),
-            const SizedBox(width: 8),
-            FilterChip(
-              label: const Text('Auto-Open Next URL'),
-              selected: _autoOpenNextUrl,
-              onSelected: (v) => setState(() => _autoOpenNextUrl = v),
-            ),
-            const SizedBox(width: 8),
             FilledButton.tonalIcon(
               onPressed: _runningGenerateHashes ? null : _runGenerateHashes,
               icon: _runningGenerateHashes
@@ -713,24 +692,58 @@ class _ScreenshotWorkflowPageState extends State<ScreenshotWorkflowPage> {
         ),
         body: Padding(
           padding: const EdgeInsets.all(16),
-          child: _items.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(_statusMessage, textAlign: TextAlign.center),
-                      const SizedBox(height: 16),
-                      FilledButton.icon(
-                        onPressed: _loadTsv,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Reload data/input.tsv'),
-                      ),
-                    ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  FilterChip(
+                    label: const Text('Watch Clipboard & Screenshots'),
+                    selected: _watchClipboardAndDirs,
+                    onSelected: (v) =>
+                        setState(() => _watchClipboardAndDirs = v),
                   ),
-                )
-              : _pendingDecodedImage != null
-                  ? _buildCropEditorView()
-                  : _buildMainWorkflowView(currentItem!, doneCount),
+                  FilterChip(
+                    label: const Text('Propose Crop in App'),
+                    tooltip:
+                        'When OFF: saves your Linux screenshot immediately & opens next URL.\n'
+                        'When ON: opens an adjustable proposed crop box before saving.',
+                    selected: _proposeCropBeforeSave,
+                    onSelected: (v) =>
+                        setState(() => _proposeCropBeforeSave = v),
+                  ),
+                  FilterChip(
+                    label: const Text('Auto-Open Next URL'),
+                    selected: _autoOpenNextUrl,
+                    onSelected: (v) => setState(() => _autoOpenNextUrl = v),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: _items.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(_statusMessage, textAlign: TextAlign.center),
+                            const SizedBox(height: 16),
+                            FilledButton.icon(
+                              onPressed: _loadTsv,
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Reload data/input.tsv'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : _pendingDecodedImage != null
+                        ? _buildCropEditorView()
+                        : _buildMainWorkflowView(currentItem!, doneCount),
+              ),
+            ],
+          ),
         ),
       ),
     );
